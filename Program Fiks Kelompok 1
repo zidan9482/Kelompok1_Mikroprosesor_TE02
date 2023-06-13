@@ -1,0 +1,66 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Pin untuk sensor gas MQ-2
+const int gasPin=A0;
+
+// Pin untuk sensor api
+const int firePin=2;
+
+// Pin untuk buzzer
+const int buzzerPin=3;
+
+// Inisialisasi objek LiquidCrystal_I2C
+LiquidCrystal_I2C lcd(0x27,16,2); // Alamat I2C LCD dan ukuran (16x2)
+
+void setup() {
+  // Mengatur pin buzzer sebagai OUTPUT
+  pinMode(buzzerPin,OUTPUT);
+
+  // Inisialisasi LCD
+  lcd.begin(16,2);
+  lcd.init();
+  lcd.clear();
+  lcd.backlight();
+}
+
+void loop() {
+  // Menampilkan pesan awal
+  lcd.setCursor(0,0);
+  lcd.print("DeteksiKebakaran");
+  
+  // Membaca sensor gas MQ-2
+  int gasValue = analogRead(gasPin);
+
+  // Jika nilai sensor gas melebihi batas, alarm menyala
+  if (gasValue>500) {
+    lcd.setCursor(0,1);
+    lcd.print("BahayaGas!");
+
+    // Mengaktifkan buzzer
+    tone(buzzerPin,2000,1000); // Frekuensi 2000 Hz, durasi 1 detik
+    delay(1000); // Jeda 1 detik
+    noTone(buzzerPin); // Mematikan buzzer
+    lcd.clear();
+  }
+  
+  // Membaca nilai sensor api
+  int fireValue = digitalRead(firePin);
+
+  // Jika ada deteksi api, aktifkan alarm
+  if (fireValue==LOW) {
+    lcd.setCursor(0,1);
+    lcd.clear();
+    lcd.print("Kebakaran!");
+    // Mengaktifkan buzzer
+    tone(buzzerPin,2000,1000); // Frekuensi 2000 Hz, durasi 1 detik
+    delay(1000); // Jeda 1 detik
+    noTone(buzzerPin); // Mematikan buzzer
+  }
+
+  // Jika tidak ada deteksi gas atau api, tampilkan pesan standar
+  lcd.setCursor(0,1);
+  lcd.print("Siaga Kebakaran");
+  
+  delay(1000); // Jeda 1 detik
+}
